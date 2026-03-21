@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Viikon Ruoka- ja Kauppalista</title>
+    <style>
+        :root {
+            --primary: #ff6600; /* K-Ruoka tyylinen oranssi */
+            --bg: #f7f9f9;
+            --text: #333;
+            --card-bg: #ffffff;
+            --border: #e1e4e8;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: var(--primary);
+        }
+
+        p.intro {
+            text-align: center;
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        /* Ruokalistan tyylit */
+        .meal-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .meal-header {
+            padding: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--card-bg);
+            transition: background-color 0.2s;
+        }
+
+        .meal-header:hover {
+            background-color: #f1f1f1;
+        }
+
+        .meal-day {
+            font-size: 0.8em;
+            color: #666;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .meal-name {
+            font-size: 1.1em;
+            color: var(--text);
+        }
+
+        .meal-ingredients {
+            display: none;
+            padding: 16px;
+            border-top: 1px dashed var(--border);
+            background-color: #fafbfc;
+        }
+
+        .meal-ingredients ul {
+            margin: 0;
+            padding-left: 20px;
+            color: #444;
+        }
+
+        /* Kauppalistan tyylit */
+        .shopping-section {
+            margin-top: 40px;
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .category-title {
+            font-size: 1.1em;
+            color: var(--primary);
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 5px;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        .shopping-item {
+            padding: 12px 8px;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            user-select: none;
+            transition: 0.2s;
+        }
+
+        .shopping-item:hover {
+            background-color: #f9f9f9;
+        }
+
+        .shopping-item::before {
+            content: '○';
+            margin-right: 12px;
+            color: #ccc;
+            font-size: 1.2em;
+        }
+
+        /* Yliviivatun tuotteen tyyli */
+        .crossed-out {
+            text-decoration: line-through;
+            color: #aaa;
+            background-color: #fdfdfd;
+        }
+
+        .crossed-out::before {
+            content: '✓';
+            color: #4CAF50;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Viikon Ruokasuunnitelma</h1>
+    <p class="intro">Tee ruoka listattuna päivänä. Nauti tuoreena, ja syö loput eväänä seuraavana päivänä!</p>
+
+    <div id="meal-plan"></div>
+
+    <div class="shopping-section">
+        <h2>Kauppalista</h2>
+        <p style="font-size: 0.8em; color: #666; text-align: center;">Paina tuotetta, kun olet kerännyt sen kärryyn.</p>
+        <div id="shopping-list"></div>
+    </div>
+</div>
+
+<script>
+    // Kaupan hyllyjärjestys toiveesi mukaisesti (indeksit 0-11)
+    const categoryNames = [
+        "Hedelmät, vihannekset ja kananmunat",
+        "Leivät, popcorn, sipsit ja juomat",
+        "Juustot ja tofu",
+        "Lihat, kanat, kalat, ravut ja voi",
+        "Creme fraiche, kreikkalainen jogurtti, maito",
+        "Tortellinit",
+        "Leikkeleet, kinkut, makkarat, nakit",
+        "Jogurtit",
+        "Talouspaperi, wc-paperit, hammastahna, pesuaineet",
+        "Murot, pastat, riisit, säilykkeet ja kuivamuonat",
+        "Tortillat, nachot, mausteet",
+        "Pakasteet"
+    ];
+
+    // Viikon reseptit ja niiden ainekset
+    // "cat" viittaa yllä olevan listan indeksiin.
+    const recipes = [
+        {
+            day: "Sunnuntai (Eväs maanantaille)",
+            name: "Uunilohi ja perunamuusi",
+            ingredients: [
+                { name: "Lohifilee (n. 600g)", cat: 3 },
+                { name: "Perunat (muusiin ja keittoon, yht. 1.5kg)", cat: 0 },
+                { name: "Maito", cat: 4 },
+                { name: "Voi", cat: 3 },
+                { name: "Tilli", cat: 0 },
+                { name: "Sitruuna", cat: 0 },
+                { name: "Suola", cat: 10 }
+            ]
+        },
+        {
+            day: "Maanantai (Eväs tiistaille)",
+            name: "Broileria hapanimeläkastikkeessa ja riisiä",
+            ingredients: [
+                { name: "Broilerin fileesuikale (400g)", cat: 3 },
+                { name: "Riisi", cat: 9 },
+                { name: "Ananassäilyke (paloina)", cat: 9 },
+                { name: "Paprika", cat: 0 },
+                { name: "Sipuli (keltasipulipussi)", cat: 0 },
+                { name: "Makea chilikastike", cat: 10 },
+                { name: "Soijakastike", cat: 10 }
+            ]
+        },
+        {
+            day: "Tiistai (Eväs keskiviikolle)",
+            name: "Jauheliha-makaronilaatikko (ilman kermaa)",
+            ingredients: [
+                { name: "Sikanauta jauheliha (400g)", cat: 3 },
+                { name: "Makaroni (400g)", cat: 9 },
+                { name: "Kananmuna (3 kpl)", cat: 0 },
+                /* Maito ja sipuli on jo muilla päivillä, järjestelmä yhdistää nämä kauppalistalla jos nimet täsmäävät */
+                { name: "Jauhelihamauste", cat: 10 }
+            ]
+        },
+        {
+            day: "Keskiviikko (Eväs torstaille)",
+            name: "Tofuwokki nuudeleilla",
+            ingredients: [
+                { name: "Maustamaton tofu (1 pkt)", cat: 2 },
+                { name: "Wokkivihannekset (pussi)", cat: 11 },
+                { name: "Nuudeli", cat: 9 },
+                { name: "Teriyakikastike", cat: 10 },
+                { name: "Seesamiöljy", cat: 10 }
+            ]
+        },
+        {
+            day: "Torstai (Eväs perjantaille)",
+            name: "Jauhelihatortillat",
+            ingredients: [
+                { name: "Tortillaletut", cat: 10 },
+                { name: "Naudan jauheliha (400g)", cat: 3 },
+                { name: "Tacomauste", cat: 10 },
+                { name: "Jäävuorisalaatti", cat: 0 },
+                { name: "Tomaatti", cat: 0 },
+                { name: "Kurkku", cat: 0 },
+                { name: "Salsa", cat: 10 },
+                { name: "Creme fraiche / Ranskankerma", cat: 4 }
+            ]
+        },
+        {
+            day: "Perjantai (Eväs lauantaille)",
+            name: "Tomaattiset juustotortellinit",
+            ingredients: [
+                { name: "Juustotortellinit (1-2 pkt)", cat: 5 },
+                { name: "Tomaattimurska (1 tlk)", cat: 9 },
+                { name: "Valkosipuli", cat: 0 },
+                { name: "Tuore basilika", cat: 0 },
+                { name: "Parmesaani-juusto", cat: 2 }
+            ]
+        },
+        {
+            day: "Lauantai (Eväs sunnuntaille)",
+            name: "Helppo nakkikeitto",
+            ingredients: [
+                { name: "Nakit (1 pkt)", cat: 6 },
+                /* Perunat ostettiin jo sunnuntaina */
+                { name: "Keittovihannekset (pussi)", cat: 11 },
+                { name: "Lihaliemikuutio", cat: 10 },
+                { name: "Maustepippuri", cat: 10 }
+            ]
+        }
+    ];
+
+    // 1. RAKENNA RUOKALISTA
+    const mealPlanContainer = document.getElementById('meal-plan');
+    
+    recipes.forEach((recipe) => {
+        const card = document.createElement('div');
+        card.className = 'meal-card';
+
+        const header = document.createElement('div');
+        header.className = 'meal-header';
+        header.innerHTML = `
+            <div>
+                <span class="meal-day">${recipe.day}</span>
+                <span class="meal-name">${recipe.name}</span>
+            </div>
+            <span>▼</span>
+        `;
+
+        const ingredientsDiv = document.createElement('div');
+        ingredientsDiv.className = 'meal-ingredients';
+        
+        const ul = document.createElement('ul');
+        recipe.ingredients.forEach(ing => {
+            const li = document.createElement('li');
+            li.textContent = ing.name;
+            ul.appendChild(li);
+        });
+        
+        ingredientsDiv.appendChild(ul);
+
+        // Klikkauksesta avautuva/sulkeutuva haitari
+        header.addEventListener('click', () => {
+            const isOpen = ingredientsDiv.style.display === 'block';
+            ingredientsDiv.style.display = isOpen ? 'none' : 'block';
+            header.querySelector('span:last-child').textContent = isOpen ? '▼' : '▲';
+        });
+
+        card.appendChild(header);
+        card.appendChild(ingredientsDiv);
+        mealPlanContainer.appendChild(card);
+    });
+
+    // 2. RAKENNA KAUPPALISTA
+    const shoppingListContainer = document.getElementById('shopping-list');
+    
+    // Luodaan objekti, joka pitää sisällään tuotteet kategorioittain (Set estää tuplien syntymisen)
+    const categorizedList = {};
+    categoryNames.forEach((_, index) => {
+        categorizedList[index] = new Set();
+    });
+
+    // Käydään läpi kaikki reseptit ja lisätään ainekset oikeisiin kategorioihin
+    recipes.forEach(recipe => {
+        recipe.ingredients.forEach(ing => {
+            categorizedList[ing.cat].add(ing.name);
+        });
+    });
+
+    // Piirretään kauppalista järjestyksessä
+    categoryNames.forEach((categoryName, index) => {
+        const items = Array.from(categorizedList[index]);
+        
+        // Jos kategoriassa on tuotteita, piirretään otsikko ja tuotteet
+        if (items.length > 0) {
+            const title = document.createElement('h3');
+            title.className = 'category-title';
+            title.textContent = categoryName;
+            shoppingListContainer.appendChild(title);
+
+            items.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'shopping-item';
+                itemDiv.textContent = item;
+                
+                // Yliviivaustoiminto klikattaessa
+                itemDiv.addEventListener('click', () => {
+                    itemDiv.classList.toggle('crossed-out');
+                });
+                
+                shoppingListContainer.appendChild(itemDiv);
+            });
+        }
+    });
+
+</script>
+</body>
+</html>
