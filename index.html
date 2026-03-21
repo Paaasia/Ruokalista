@@ -11,6 +11,7 @@
             --text: #333;
             --card-bg: #ffffff;
             --border: #e1e4e8;
+            --accent: #007bff;
         }
 
         body {
@@ -32,13 +33,6 @@
             color: var(--primary);
         }
 
-        p.intro {
-            text-align: center;
-            font-size: 0.9em;
-            color: #666;
-            margin-bottom: 30px;
-        }
-
         .meal-card {
             background: var(--card-bg);
             border: 1px solid var(--border);
@@ -50,293 +44,241 @@
 
         .meal-header {
             padding: 16px;
-            font-weight: 600;
             cursor: pointer;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background-color: var(--card-bg);
-            transition: background-color 0.2s;
         }
 
-        .meal-header:hover {
-            background-color: #f1f1f1;
+        .meal-info { display: flex; flex-direction: column; flex-grow: 1; }
+        .meal-day { font-size: 0.8em; color: #666; font-weight: bold; }
+        .meal-name { font-size: 1.1em; font-weight: 600; }
+
+        .controls { display: flex; align-items: center; gap: 15px; }
+        .reroll-btn {
+            background: #fff; border: 1px solid #ddd; border-radius: 50%;
+            width: 35px; height: 35px; cursor: pointer; font-size: 1.2em;
+            display: flex; justify-content: center; align-items: center;
         }
 
-        .meal-info {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .meal-day {
-            font-size: 0.8em;
-            color: #666;
-            margin-bottom: 2px;
-        }
-
-        .meal-name {
-            font-size: 1.1em;
-            color: var(--text);
-        }
-
-        .meal-ingredients {
-            display: none;
-            padding: 16px;
-            border-top: 1px dashed var(--border);
-            background-color: #fafbfc;
-        }
-
-        .meal-ingredients ul {
-            margin: 0;
-            padding-left: 20px;
-            color: #444;
-        }
+        .meal-ingredients { display: none; padding: 16px; border-top: 1px dashed var(--border); background-color: #fafbfc; }
 
         .shopping-section {
-            margin-top: 40px;
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-top: 40px; background: var(--card-bg); padding: 20px;
+            border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        /* Uuden tuotteen lisäys */
+        .add-item-box {
+            display: flex; gap: 10px; margin-bottom: 20px;
+        }
+        .add-item-box input {
+            flex-grow: 1; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px;
+        }
+        .add-item-box button {
+            padding: 10px 15px; background: var(--primary); color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer;
         }
 
         .category-title {
-            font-size: 1.1em;
-            color: var(--primary);
-            border-bottom: 2px solid var(--primary);
-            padding-bottom: 5px;
-            margin-top: 20px;
-            margin-bottom: 10px;
+            font-size: 1.1em; color: var(--primary); border-bottom: 2px solid var(--primary);
+            padding-bottom: 5px; margin-top: 20px; margin-bottom: 10px;
         }
 
         .shopping-item {
-            padding: 12px 8px;
-            border-bottom: 1px solid var(--border);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            user-select: none;
-            transition: 0.2s;
+            padding: 12px 8px; border-bottom: 1px solid var(--border);
+            cursor: pointer; display: flex; justify-content: space-between; align-items: center;
         }
+        .item-text::before { content: '○'; margin-right: 12px; color: #ccc; }
+        .crossed-out .item-text { text-decoration: line-through; color: #aaa; }
+        .crossed-out .item-text::before { content: '✓'; color: #4CAF50; }
 
-        .shopping-item:hover {
-            background-color: #f9f9f9;
-        }
-
-        .shopping-item::before {
-            content: '○';
-            margin-right: 12px;
-            color: #ccc;
-            font-size: 1.2em;
-        }
-
-        .crossed-out {
-            text-decoration: line-through;
-            color: #aaa;
-            background-color: #fdfdfd;
-        }
-
-        .crossed-out::before {
-            content: '✓';
-            color: #4CAF50;
-        }
+        .delete-item { color: #cc0000; font-size: 0.8em; padding: 5px; }
 
         .reset-btn {
-            display: block;
-            width: 100%;
-            margin-top: 20px;
-            padding: 12px;
-            background: #eee;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            color: #666;
-            font-weight: bold;
+            display: block; width: 100%; margin-top: 20px; padding: 12px;
+            background: #eee; border: none; border-radius: 5px; cursor: pointer; color: #666; font-weight: bold;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Viikon Ruokasuunnitelma</h1>
-    <p class="intro">Tee ruoka listattuna päivänä. Nauti tuoreena, ja syö loput eväänä seuraavana päivänä!</p>
-
+    <h1>Ruokasuunnitelma</h1>
     <div id="meal-plan"></div>
 
     <div class="shopping-section">
         <h2>Kauppalista</h2>
+        
+        <div class="add-item-box">
+            <input type="text" id="customItemInput" placeholder="Lisää oma tuote (esim. Maito)...">
+            <button onclick="addCustomItem()">Lisää</button>
+        </div>
+
         <div id="shopping-list"></div>
-        <button class="reset-btn" onclick="resetList()">Tyhjennä yliviivaukset</button>
+        <button class="reset-btn" onclick="resetList()">Tyhjennä koko lista</button>
     </div>
 </div>
 
 <script>
     const categoryNames = [
-        "Hedelmät, vihannekset ja kananmunat",
-        "Leivät, popcorn, sipsit ja juomat",
-        "Juustot ja tofu",
-        "Lihat, kanat, kalat, ravut ja voi",
-        "Creme fraiche, kreikkalainen jogurtti, maito",
-        "Tortellinit",
-        "Leikkeleet, kinkut, makkarat, nakit",
-        "Jogurtit",
-        "Talouspaperi, wc-paperit, hammastahna, pesuaineet",
-        "Murot, pastat, riisit, säilykkeet ja kuivamuonat",
-        "Tortillat, nachot, mausteet",
-        "Pakasteet"
+        "Hedelmät, vihannekset ja kananmunat", "Leivät, popcorn, sipsit ja juomat", 
+        "Juustot ja tofu", "Lihat, kanat, kalat, ravut ja voi", 
+        "Creme fraiche, kreikkalainen jogurtti, maito", "Tortellinit", 
+        "Leikkeleet, kinkut, makkarat, nakit", "Jogurtit", 
+        "Talouspaperi, wc-paperit, hammastahna, pesuaineet", 
+        "Murot, pastat, riisit, säilykkeet ja kuivamuonat", 
+        "Tortillat, nachot, mausteet", "Pakasteet", "Muut tuotteet"
     ];
 
-    const recipes = [
-        {
-            day: "Sunnuntai (Eväs maanantaille)",
-            name: "Uunilohi ja perunamuusi",
-            ingredients: [
-                { name: "Lohifilee (n. 600g)", cat: 3 },
-                { name: "Perunat (yht. 1.5kg)", cat: 0 },
-                { name: "Maito", cat: 4 },
-                { name: "Voi", cat: 3 },
-                { name: "Tilli", cat: 0 },
-                { name: "Sitruuna", cat: 0 },
-                { name: "Suola", cat: 10 }
-            ]
-        },
-        {
-            day: "Maanantai (Eväs tiistaille)",
-            name: "Broileria hapanimeläkastikkeessa ja riisiä",
-            ingredients: [
-                { name: "Broilerin fileesuikale (400g)", cat: 3 },
-                { name: "Riisi", cat: 9 },
-                { name: "Ananassäilyke", cat: 9 },
-                { name: "Paprika", cat: 0 },
-                { name: "Sipuli", cat: 0 },
-                { name: "Makea chilikastike", cat: 10 },
-                { name: "Soijakastike", cat: 10 }
-            ]
-        },
-        {
-            day: "Tiistai (Eväs keskiviikolle)",
-            name: "Jauheliha-makaronilaatikko",
-            ingredients: [
-                { name: "Sikanauta jauheliha (400g)", cat: 3 },
-                { name: "Makaroni (400g)", cat: 9 },
-                { name: "Kananmuna (3 kpl)", cat: 0 },
-                { name: "Jauhelihamauste", cat: 10 }
-            ]
-        },
-        {
-            day: "Keskiviikko (Eväs torstaille)",
-            name: "Tofuwokki nuudeleilla",
-            ingredients: [
-                { name: "Maustamaton tofu (1 pkt)", cat: 2 },
-                { name: "Wokkivihannekset (pussi)", cat: 11 },
-                { name: "Nuudeli", cat: 9 },
-                { name: "Teriyakikastike", cat: 10 },
-                { name: "Seesamiöljy", cat: 10 }
-            ]
-        },
-        {
-            day: "Torstai (Eväs perjantaille)",
-            name: "Jauhelihatortillat",
-            ingredients: [
-                { name: "Tortillaletut", cat: 10 },
-                { name: "Naudan jauheliha (400g)", cat: 3 },
-                { name: "Tacomauste", cat: 10 },
-                { name: "Jäävuorisalaatti", cat: 0 },
-                { name: "Tomaatti", cat: 0 },
-                { name: "Kurkku", cat: 0 },
-                { name: "Salsa", cat: 10 },
-                { name: "Creme fraiche", cat: 4 }
-            ]
-        },
-        {
-            day: "Perjantai (Eväs lauantaille)",
-            name: "Tomaattiset juustotortellinit",
-            ingredients: [
-                { name: "Juustotortellinit", cat: 5 },
-                { name: "Tomaattimurska (1 tlk)", cat: 9 },
-                { name: "Valkosipuli", cat: 0 },
-                { name: "Tuore basilika", cat: 0 },
-                { name: "Parmesaani-juusto", cat: 2 }
-            ]
-        },
-        {
-            day: "Lauantai (Eväs sunnuntaille)",
-            name: "Helppo nakkikeitto",
-            ingredients: [
-                { name: "Nakit (1 pkt)", cat: 6 },
-                { name: "Keittovihannekset (pussi)", cat: 11 },
-                { name: "Lihaliemikuutio", cat: 10 }
-            ]
-        }
+    const allRecipes = [
+        { name: "Uunilohi ja perunamuusi", ingredients: [{name: "Lohifilee (600g)", cat: 3}, {name: "Perunat", cat: 0}, {name: "Maito", cat: 4}, {name: "Voi", cat: 3}, {name: "Tilli", cat: 0}] },
+        { name: "Broileria hapanimeläkastikkeessa", ingredients: [{name: "Broilerin fileesuikale", cat: 3}, {name: "Riisi", cat: 9}, {name: "Ananassäilyke", cat: 9}, {name: "Paprika", cat: 0}, {name: "Sipuli", cat: 0}] },
+        { name: "Jauheliha-makaronilaatikko", ingredients: [{name: "Jauheliha", cat: 3}, {name: "Makaroni", cat: 9}, {name: "Kananmuna", cat: 0}, {name: "Jauhelihamauste", cat: 10}] },
+        { name: "Tofuwokki nuudeleilla", ingredients: [{name: "Tofu", cat: 2}, {name: "Wokkivihannekset", cat: 11}, {name: "Nuudeli", cat: 9}, {name: "Teriyakikastike", cat: 10}] },
+        { name: "Jauhelihatortillat", ingredients: [{name: "Tortillaletut", cat: 10}, {name: "Jauheliha", cat: 3}, {name: "Jäävuorisalaatti", cat: 0}, {name: "Salsa", cat: 10}, {name: "Creme fraiche", cat: 4}] },
+        { name: "Juustotortellinit", ingredients: [{name: "Juustotortellinit", cat: 5}, {name: "Tomaattimurska", cat: 9}, {name: "Valkosipuli", cat: 0}, {name: "Parmesaani", cat: 2}] },
+        { name: "Nakkikeitto", ingredients: [{name: "Nakit", cat: 6}, {name: "Perunat", cat: 0}, {name: "Keittovihannekset", cat: 11}, {name: "Lihaliemi", cat: 10}] }
     ];
 
-    // Piirretään ruokalista
-    const mealPlanContainer = document.getElementById('meal-plan');
-    recipes.forEach((recipe) => {
-        const card = document.createElement('div');
-        card.className = 'meal-card';
-        
-        // Luodaan HTML rakenne, jossa tekstit ja nuoli ovat erillään
-        card.innerHTML = `
-            <div class="meal-header">
-                <div class="meal-info">
-                    <span class="meal-day">${recipe.day}</span>
-                    <span class="meal-name">${recipe.name}</span>
-                </div>
-                <span class="arrow">▼</span>
-            </div>
-            <div class="meal-ingredients">
-                <ul>${recipe.ingredients.map(i => `<li>${i.name}</li>`).join('')}</ul>
-            </div>
-        `;
+    const days = ["Sunnuntai (Eväs ma)", "Maanantai (Eväs ti)", "Tiistai (Eväs ke)", "Keskiviikko (Eväs to)", "Torstai (Eväs pe)", "Perjantai (Eväs la)", "Lauantai (Eväs su)"];
+    
+    let weeklySelection = JSON.parse(localStorage.getItem('weeklySelection')) || [];
+    let customItems = JSON.parse(localStorage.getItem('customItems')) || [];
+    let checkedItems = JSON.parse(localStorage.getItem('shoppingListState')) || {};
 
-        // Lisätään klikkaustoiminto
-        const header = card.querySelector('.meal-header');
-        header.addEventListener('click', () => {
-            const body = card.querySelector('.meal-ingredients');
-            const arrow = header.querySelector('.arrow');
-            const isOpen = body.style.display === 'block';
-            
-            body.style.display = isOpen ? 'none' : 'block';
-            arrow.textContent = isOpen ? '▼' : '▲';
-        });
-
-        mealPlanContainer.appendChild(card);
-    });
-
-    // Piirretään kauppalista
-    const shoppingListContainer = document.getElementById('shopping-list');
-    const savedStates = JSON.parse(localStorage.getItem('shoppingListState') || '{}');
-
-    categoryNames.forEach((catName, idx) => {
-        const items = [...new Set(recipes.flatMap(r => r.ingredients).filter(i => i.cat === idx).map(i => i.name))];
-        if (items.length > 0) {
-            const h3 = document.createElement('h3');
-            h3.className = 'category-title';
-            h3.textContent = catName;
-            shoppingListContainer.appendChild(h3);
-
-            items.forEach(name => {
-                const div = document.createElement('div');
-                div.className = 'shopping-item';
-                if (savedStates[name]) div.classList.add('crossed-out');
-                div.textContent = name;
-                div.onclick = () => {
-                    div.classList.toggle('crossed-out');
-                    savedStates[name] = div.classList.contains('crossed-out');
-                    localStorage.setItem('shoppingListState', JSON.stringify(savedStates));
-                };
-                shoppingListContainer.appendChild(div);
-            });
-        }
-    });
-
-    function resetList() {
-        if(confirm("Haluatko varmasti tyhjentää kaikki yliviivaukset?")) {
-            localStorage.removeItem('shoppingListState');
-            location.reload();
+    function initWeek() {
+        if (weeklySelection.length === 0) {
+            let pool = [...allRecipes];
+            for(let i=0; i<7; i++) {
+                const idx = Math.floor(Math.random() * pool.length);
+                weeklySelection.push({ ...pool[idx], day: days[i] });
+            }
+            save();
         }
     }
+
+    function save() {
+        localStorage.setItem('weeklySelection', JSON.stringify(weeklySelection));
+        localStorage.setItem('customItems', JSON.stringify(customItems));
+        localStorage.setItem('shoppingListState', JSON.stringify(checkedItems));
+    }
+
+    function renderApp() {
+        renderMeals();
+        renderShoppingList();
+    }
+
+    function renderMeals() {
+        const container = document.getElementById('meal-plan');
+        container.innerHTML = '';
+        weeklySelection.forEach((recipe, index) => {
+            const card = document.createElement('div');
+            card.className = 'meal-card';
+            card.innerHTML = `
+                <div class="meal-header">
+                    <div class="meal-info" onclick="toggleIngredients(${index})">
+                        <span class="meal-day">${recipe.day}</span>
+                        <span class="meal-name">${recipe.name}</span>
+                    </div>
+                    <div class="controls">
+                        <button class="reroll-btn" onclick="rerollMeal(${index})">🎲</button>
+                        <span class="arrow" onclick="toggleIngredients(${index})">▼</span>
+                    </div>
+                </div>
+                <div class="meal-ingredients" id="ing-${index}">
+                    <ul>${recipe.ingredients.map(i => `<li>${i.name}</li>`).join('')}</ul>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    function toggleIngredients(index) {
+        const el = document.getElementById(`ing-${index}`);
+        el.style.display = el.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function rerollMeal(index) {
+        const next = allRecipes[Math.floor(Math.random() * allRecipes.length)];
+        weeklySelection[index] = { ...next, day: days[index] };
+        save();
+        renderApp();
+    }
+
+    function addCustomItem() {
+        const input = document.getElementById('customItemInput');
+        const name = input.value.trim();
+        if (name) {
+            // Yksinkertainen automaattinen kategorisointi
+            let cat = 12; // Oletus: Muut
+            const n = name.toLowerCase();
+            if (n.includes("maito") || n.includes("jogurtti") || n.includes("kerma")) cat = 4;
+            else if (n.includes("leipä") || n.includes("kokis") || n.includes("sips")) cat = 1;
+            else if (n.includes("omena") || n.includes("banaani") || n.includes("tomaatti")) cat = 0;
+            else if (n.includes("paperi") || n.includes("tahna") || n.includes("pesu")) cat = 8;
+            
+            customItems.push({ name, cat });
+            input.value = '';
+            save();
+            renderApp();
+        }
+    }
+
+    function removeCustomItem(name) {
+        customItems = customItems.filter(i => i.name !== name);
+        delete checkedItems[name];
+        save();
+        renderApp();
+    }
+
+    function renderShoppingList() {
+        const container = document.getElementById('shopping-list');
+        container.innerHTML = '';
+
+        categoryNames.forEach((catName, catIdx) => {
+            const recipeItems = weeklySelection.flatMap(r => r.ingredients).filter(i => i.cat === catIdx).map(i => i.name);
+            const userItems = customItems.filter(i => i.cat === catIdx).map(i => i.name);
+            const allItems = [...new Set([...recipeItems, ...userItems])];
+
+            if (allItems.length > 0) {
+                const h3 = document.createElement('h3');
+                h3.className = 'category-title';
+                h3.textContent = catName;
+                container.appendChild(h3);
+
+                allItems.forEach(name => {
+                    const isCustom = userItems.includes(name);
+                    const div = document.createElement('div');
+                    div.className = 'shopping-item' + (checkedItems[name] ? ' crossed-out' : '');
+                    div.innerHTML = `
+                        <span class="item-text" onclick="toggleCheck('${name}')">${name}</span>
+                        ${isCustom ? `<span class="delete-item" onclick="removeCustomItem('${name}')">Poista</span>` : ''}
+                    `;
+                    container.appendChild(div);
+                });
+            }
+        });
+    }
+
+    window.toggleCheck = function(name) {
+        checkedItems[name] = !checkedItems[name];
+        save();
+        renderApp();
+    }
+
+    function resetList() {
+        if(confirm("Haluatko arpoa uuden viikon ja tyhjentää listan?")) {
+            localStorage.clear();
+            weeklySelection = [];
+            customItems = [];
+            checkedItems = {};
+            initWeek();
+            renderApp();
+        }
+    }
+
+    initWeek();
+    renderApp();
 </script>
 </body>
 </html>
