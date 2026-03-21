@@ -23,31 +23,18 @@
             line-height: 1.5;
         }
 
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        h1, h2 {
-            text-align: center;
-            color: var(--primary);
-        }
+        .container { max-width: 600px; margin: 0 auto; }
+        h1, h2 { text-align: center; color: var(--primary); }
 
         .meal-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            margin-bottom: 12px;
-            overflow: hidden;
+            background: var(--card-bg); border: 1px solid var(--border);
+            border-radius: 8px; margin-bottom: 12px; overflow: hidden;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
         .meal-header {
-            padding: 16px;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            padding: 16px; cursor: pointer; display: flex;
+            justify-content: space-between; align-items: center;
         }
 
         .meal-info { display: flex; flex-direction: column; flex-grow: 1; }
@@ -68,16 +55,9 @@
             border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
-        /* Uuden tuotteen lisäys */
-        .add-item-box {
-            display: flex; gap: 10px; margin-bottom: 20px;
-        }
-        .add-item-box input {
-            flex-grow: 1; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px;
-        }
-        .add-item-box button {
-            padding: 10px 15px; background: var(--primary); color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer;
-        }
+        .add-item-box { display: flex; gap: 10px; margin-bottom: 20px; }
+        .add-item-box input { flex-grow: 1; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px; }
+        .add-item-box button { padding: 10px 15px; background: var(--primary); color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; }
 
         .category-title {
             font-size: 1.1em; color: var(--primary); border-bottom: 2px solid var(--primary);
@@ -108,14 +88,12 @@
 
     <div class="shopping-section">
         <h2>Kauppalista</h2>
-        
         <div class="add-item-box">
             <input type="text" id="customItemInput" placeholder="Lisää oma tuote (esim. Maito)...">
             <button onclick="addCustomItem()">Lisää</button>
         </div>
-
         <div id="shopping-list"></div>
-        <button class="reset-btn" onclick="resetList()">Tyhjennä koko lista</button>
+        <button class="reset-btn" onclick="resetList()">Tyhjennä koko lista ja arvo uusi viikko</button>
     </div>
 </div>
 
@@ -130,14 +108,157 @@
         "Tortillat, nachot, mausteet", "Pakasteet", "Muut tuotteet"
     ];
 
+    const defaultIng = [{name: "Lisää ainekset koodiin myöhemmin", cat: 12}];
+
     const allRecipes = [
+        // Alkuperäiset
         { name: "Uunilohi ja perunamuusi", ingredients: [{name: "Lohifilee (600g)", cat: 3}, {name: "Perunat", cat: 0}, {name: "Maito", cat: 4}, {name: "Voi", cat: 3}, {name: "Tilli", cat: 0}] },
         { name: "Broileria hapanimeläkastikkeessa", ingredients: [{name: "Broilerin fileesuikale", cat: 3}, {name: "Riisi", cat: 9}, {name: "Ananassäilyke", cat: 9}, {name: "Paprika", cat: 0}, {name: "Sipuli", cat: 0}] },
         { name: "Jauheliha-makaronilaatikko", ingredients: [{name: "Jauheliha", cat: 3}, {name: "Makaroni", cat: 9}, {name: "Kananmuna", cat: 0}, {name: "Jauhelihamauste", cat: 10}] },
         { name: "Tofuwokki nuudeleilla", ingredients: [{name: "Tofu", cat: 2}, {name: "Wokkivihannekset", cat: 11}, {name: "Nuudeli", cat: 9}, {name: "Teriyakikastike", cat: 10}] },
         { name: "Jauhelihatortillat", ingredients: [{name: "Tortillaletut", cat: 10}, {name: "Jauheliha", cat: 3}, {name: "Jäävuorisalaatti", cat: 0}, {name: "Salsa", cat: 10}, {name: "Creme fraiche", cat: 4}] },
         { name: "Juustotortellinit", ingredients: [{name: "Juustotortellinit", cat: 5}, {name: "Tomaattimurska", cat: 9}, {name: "Valkosipuli", cat: 0}, {name: "Parmesaani", cat: 2}] },
-        { name: "Nakkikeitto", ingredients: [{name: "Nakit", cat: 6}, {name: "Perunat", cat: 0}, {name: "Keittovihannekset", cat: 11}, {name: "Lihaliemi", cat: 10}] }
+        { name: "Nakkikeitto", ingredients: [{name: "Nakit", cat: 6}, {name: "Perunat", cat: 0}, {name: "Keittovihannekset", cat: 11}, {name: "Lihaliemi", cat: 10}] },
+        
+        // Aiempi lista ja päivitetyt K-Ruoka reseptit
+        { name: "Kanasalaatti parmesankastikkeella", ingredients: defaultIng },
+        
+        { name: "Mozzarella-pastasalaatti (K-ruoka)", ingredients: [
+            {name: "Pasta", cat: 9}, {name: "Minimozzarella", cat: 2}, 
+            {name: "Kirsikkatomaatti", cat: 0}, {name: "Pesto", cat: 10}, 
+            {name: "Rucola", cat: 0}, {name: "Vaalea balsamico", cat: 10}
+        ]},
+        
+        { name: "Tonnikala-juusto-hemapasalaatti", ingredients: defaultIng },
+        { name: "Kana-nuudelipelti", ingredients: defaultIng },
+        { name: "Kana-vuohenjuustosalaatti", ingredients: defaultIng },
+        
+        { name: "Kananachopelti", ingredients: [
+            {name: "Kariniemen kananpojan fajitassuikale", cat: 3}, {name: "Rypsiöljy", cat: 10}, 
+            {name: "Kikherneitä (säilyke)", cat: 9}, {name: "Tortillachipsit", cat: 10}, 
+            {name: "Cheddar-juusto", cat: 2}, {name: "Tomaatti", cat: 0}, {name: "Kurkku", cat: 0}, 
+            {name: "Jäävuorisalaatti", cat: 0}, {name: "Tuore korianteri", cat: 0}, 
+            {name: "Jalapenoviipaleet", cat: 9}, {name: "Creme fraiche", cat: 4}, {name: "Salsa", cat: 10}
+        ]},
+        
+        { name: "Broilerimaissisalaatti", ingredients: defaultIng },
+        { name: "Kinkku-gouda-munatoast", ingredients: defaultIng },
+        
+        { name: "Kesäinen pyttipannu", ingredients: [
+            {name: "Grillibalkan / makkara", cat: 6}, {name: "Valkoisia papuja (säilyke)", cat: 9}, 
+            {name: "Uusia perunoita", cat: 0}, {name: "Kesäkurpitsa", cat: 0}, 
+            {name: "Keltainen paprika", cat: 0}, {name: "Sipuli", cat: 0}, 
+            {name: "Valkosipuli", cat: 0}, {name: "Kevätsipuli", cat: 0}, 
+            {name: "Öljy", cat: 10}, {name: "Creme fraiche", cat: 4}, {name: "Sinappi", cat: 10}
+        ]},
+        
+        { name: "Täytetyt paprikat", ingredients: defaultIng },
+        { name: "Lihapullavuoka + spagu", ingredients: defaultIng },
+        { name: "Pad Thai", ingredients: defaultIng },
+        
+        { name: "Pekoni-herkkusienipasta", ingredients: [
+            {name: "Pekoni", cat: 3}, {name: "Herkkusieni", cat: 0}, {name: "Pasta", cat: 9}, 
+            {name: "Punasipuli", cat: 0}, {name: "Valkosipuli", cat: 0}, {name: "Ruohosipuli", cat: 0}, 
+            {name: "Parmesaani", cat: 2}, {name: "Oliiviöljy", cat: 10}
+        ]},
+        
+        { name: "Halloumi-pinaatti-uunimunakas", ingredients: defaultIng },
+        { name: "Lämmin fetasalaatti + kala tai kana", ingredients: defaultIng },
+        { name: "Burrito Bowl", ingredients: defaultIng },
+        { name: "Kikherne-couscoussalaatti + kana", ingredients: defaultIng },
+        { name: "Veriappelsiinisalaatti + kanafile", ingredients: defaultIng },
+        { name: "Pekoni-jokirapu-hernepasta", ingredients: defaultIng },
+        { name: "Gnocchivuoka (Henri Alén)", ingredients: defaultIng },
+
+        // Uudet listat (Kuva 1)
+        { name: "Uunilohi + sitrussalsa + peruna", ingredients: defaultIng },
+        { name: "Juusto-kinkkusalaatti", ingredients: defaultIng },
+        { name: "Kalapuikot + peruna + kasvis", ingredients: defaultIng },
+        { name: "Ruispuuro + suolapala", ingredients: defaultIng },
+        { name: "Portugalilainen kalakeitto", ingredients: defaultIng },
+        { name: "Bouillabaisse", ingredients: defaultIng },
+        { name: "Pika tonnikalapizzat", ingredients: defaultIng },
+        { name: "Kukkakaali + aurajuusto + lohi tai makkara", ingredients: defaultIng },
+        { name: "Kikhernepihvit", ingredients: defaultIng },
+        { name: "Nakkimunakas", ingredients: defaultIng },
+        { name: "Pinaattiletut", ingredients: defaultIng },
+        { name: "Brie-kalkkunatoastit", ingredients: defaultIng },
+        { name: "Juustopasta-suolalihasalaatti", ingredients: defaultIng },
+        { name: "Sienirisotto + possun sisäfile", ingredients: defaultIng },
+        { name: "Tonnikalapastavuoka", ingredients: defaultIng },
+        { name: "Pizzetit", ingredients: defaultIng },
+        { name: "Suolaliha smørrebröd", ingredients: defaultIng },
+        { name: "Thaimaalainen broileripihvi", ingredients: defaultIng },
+        { name: "Rieska-gyros", ingredients: defaultIng },
+        { name: "Lähi-idän peruna-halloumivartaat + kana", ingredients: defaultIng },
+        { name: "Greippi-lohisalaatti", ingredients: defaultIng },
+        { name: "Falafel + minttujogurtti", ingredients: defaultIng },
+        { name: "Linssisalaatti", ingredients: defaultIng },
+
+        // Uudet listat (Kuva 2)
+        { name: "Lehtevä savukinkkupiirakka", ingredients: defaultIng },
+        { name: "Tonnikalapapu-nachot", ingredients: defaultIng },
+        { name: "Parmankinkku-broccolinipasta", ingredients: defaultIng },
+        { name: "Kreikkalainen broileri-pastasalaatti", ingredients: defaultIng },
+        { name: "Itämainen kanakeitto", ingredients: defaultIng },
+        { name: "Nyhtökana pitaleivät", ingredients: defaultIng },
+        { name: "Flammkuchen", ingredients: defaultIng },
+        { name: "Nachopelti", ingredients: defaultIng },
+        
+        { name: "Siskonmakkarakeitto", ingredients: [
+            {name: "Siskonmakkara", cat: 6}, {name: "Vesi", cat: 12}, 
+            {name: "Kasvisliemikuutio", cat: 10}, {name: "Maustepippuri", cat: 10}, 
+            {name: "Peruna", cat: 0}, {name: "Keittojuurekset (pakaste)", cat: 11}, {name: "Persilja", cat: 0}
+        ]},
+        
+        { name: "Tonnikala-couscoussalaatti", ingredients: defaultIng },
+        { name: "Olivian pastakastike", ingredients: defaultIng },
+        { name: "Cobb-salaatti", ingredients: defaultIng },
+        { name: "Kalapuikkotortillat", ingredients: defaultIng },
+        { name: "Savukala + kreikkalainen salaatti", ingredients: defaultIng },
+        { name: "Välimeren lihapullavuoka", ingredients: defaultIng },
+        { name: "Pizza", ingredients: defaultIng },
+        { name: "Pestolihapullat + spagetti", ingredients: defaultIng },
+        { name: "Tonnikalalasagne", ingredients: defaultIng },
+        { name: "Kanasuikale + riisi + kasvis", ingredients: defaultIng },
+        { name: "Juusto-kasvissalaatti", ingredients: defaultIng },
+        { name: "Ruokaisa tonnikalasalaatti", ingredients: defaultIng },
+        { name: "Nakkikastike + peruna", ingredients: defaultIng },
+        { name: "Kreikkalainen jauhelihakeitto", ingredients: defaultIng },
+        { name: "Herne-pekoni-pasta + kana", ingredients: defaultIng },
+        { name: "Chili con carne", ingredients: defaultIng },
+        { name: "Paella", ingredients: defaultIng },
+
+        // Uudet listat (Kuva 3)
+        { name: "Meetvurstipastasalaatti", ingredients: defaultIng },
+        { name: "Pyttipannu", ingredients: defaultIng },
+        { name: "Ruskea jauhelihakastike + spagu", ingredients: defaultIng },
+        { name: "Broilerin koivet + riisi", ingredients: defaultIng },
+        { name: "Bolognese + spagu", ingredients: defaultIng },
+        { name: "Ranskalainen jauhelihapasta", ingredients: defaultIng },
+        { name: "Tonnikalapasta", ingredients: defaultIng },
+        { name: "Uuniperuna", ingredients: defaultIng },
+        { name: "Uunijuurekset + makkara", ingredients: defaultIng },
+        { name: "Siivet + riisi", ingredients: defaultIng },
+        { name: "Simpukkapasta", ingredients: defaultIng },
+        { name: "Rapupasta", ingredients: defaultIng },
+        { name: "Pinaattinen uunilohi", ingredients: defaultIng },
+        { name: "Kukkakaali-kikhernecurry", ingredients: defaultIng },
+        { name: "Makaronilaatikko", ingredients: defaultIng },
+        { name: "Bratu-hodarit", ingredients: defaultIng },
+        { name: "Italialainen makkarapata + pasta", ingredients: defaultIng },
+        { name: "Meksikolainen papu-jauhelihakeitto", ingredients: defaultIng },
+        { name: "Pasta all'Amatriciana", ingredients: defaultIng },
+        { name: "Ankankoipi + juurekset", ingredients: defaultIng },
+        { name: "Norjalainen lohikeitto", ingredients: defaultIng },
+        { name: "Tonnikalasalaatti", ingredients: defaultIng },
+        { name: "Rapurisotto", ingredients: defaultIng },
+        { name: "Caldo verde", ingredients: defaultIng },
+        { name: "Tomaatti-mozzarella-pyttipannu", ingredients: defaultIng },
+        { name: "Linssi-shakshuka", ingredients: defaultIng },
+        { name: "Mehukas ja edullinen kanapasta", ingredients: defaultIng },
+        { name: "Nuudeli-broilerikeitto", ingredients: defaultIng },
+        { name: "Viherpippurilohi ja fenkolipaistos", ingredients: defaultIng }
     ];
 
     const days = ["Sunnuntai (Eväs ma)", "Maanantai (Eväs ti)", "Tiistai (Eväs ke)", "Keskiviikko (Eväs to)", "Torstai (Eväs pe)", "Perjantai (Eväs la)", "Lauantai (Eväs su)"];
@@ -152,6 +273,7 @@
             for(let i=0; i<7; i++) {
                 const idx = Math.floor(Math.random() * pool.length);
                 weeklySelection.push({ ...pool[idx], day: days[i] });
+                pool.splice(idx, 1);
             }
             save();
         }
@@ -199,17 +321,20 @@
     }
 
     function rerollMeal(index) {
-        const next = allRecipes[Math.floor(Math.random() * allRecipes.length)];
-        weeklySelection[index] = { ...next, day: days[index] };
-        save();
-        renderApp();
+        const currentNames = weeklySelection.map(r => r.name);
+        const available = allRecipes.filter(r => !currentNames.includes(r.name));
+        if (available.length > 0) {
+            const next = available[Math.floor(Math.random() * available.length)];
+            weeklySelection[index] = { ...next, day: days[index] };
+            save();
+            renderApp();
+        }
     }
 
     function addCustomItem() {
         const input = document.getElementById('customItemInput');
         const name = input.value.trim();
         if (name) {
-            // Yksinkertainen automaattinen kategorisointi
             let cat = 12; // Oletus: Muut
             const n = name.toLowerCase();
             if (n.includes("maito") || n.includes("jogurtti") || n.includes("kerma")) cat = 4;
@@ -267,7 +392,7 @@
     }
 
     function resetList() {
-        if(confirm("Haluatko arpoa uuden viikon ja tyhjentää listan?")) {
+        if(confirm("Haluatko arpoa uuden viikon ja tyhjentää kauppalistan?")) {
             localStorage.clear();
             weeklySelection = [];
             customItems = [];
