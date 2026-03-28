@@ -81,7 +81,7 @@
         .delete-item { color: #cc0000; font-size: 0.85em; padding: 5px; font-weight: 500; }
 
         .reset-btn {
-            display: block; width: 100%; margin-top: 30px; padding: 14px;
+            display: block; width: 100%; margin-bottom: 20px; padding: 14px;
             background: #f1f1f1; border: none; border-radius: 5px; cursor: pointer; color: #666; font-weight: bold;
         }
         
@@ -99,13 +99,14 @@
     <div class="shopping-section">
         <h2>Kauppalista</h2>
         
+        <button class="reset-btn" onclick="resetList()">Tyhjennä lista ja arvo uusi viikko</button>
+
         <div class="add-item-box">
             <input type="text" id="customItemInput" placeholder="Lisää esim. Hammastahna...">
             <button onclick="addCustomItem()">Lisää</button>
         </div>
 
         <div id="shopping-list"></div>
-        <button class="reset-btn" onclick="resetList()">Tyhjennä lista ja arvo uusi viikko</button>
     </div>
 </div>
 
@@ -147,7 +148,7 @@
         { name: "Nakkikastike + peruna", ingredients: [{name: "Nakit", cat: 6}, {name: "Peruna", cat: 0}, {name: "Vehnäjauho", cat: 9}, {name: "Voi", cat: 3}, {name: "Lihaliemi", cat: 10}] },
         { name: "Pad Thai", ingredients: [{name: "Riisinuudeli", cat: 9}, {name: "Kanan fileesuikale", cat: 3}, {name: "Kananmuna", cat: 0}, {name: "Pähkinärouhe", cat: 1}, {name: "Lime", cat: 0}, {name: "Pad Thai -kastike", cat: 10}] },
 
-        // Ryhmä 2: Käsin kirjoitetut listat (Yli 80 kpl)
+        // Ryhmä 2: Käsin kirjoitetut listat
         { name: "Kanasalaatti parmesankastikkeella", ingredients: [{name: "Kana", cat: 3}, {name: "Salaattisekoitus", cat: 0}, {name: "Parmesaani", cat: 2}, {name: "Leipäkuutiot", cat: 1}] },
         { name: "Mozzarella-pastasalaatti", ingredients: [{name: "Pasta", cat: 9}, {name: "Minimozzarella", cat: 2}, {name: "Kirsikkatomaatti", cat: 0}, {name: "Pesto", cat: 10}] },
         { name: "Tonnikala-juusto-hemapasalaatti", ingredients: [{name: "Tonnikala", cat: 9}, {name: "Juustokuutiot", cat: 2}, {name: "Herne-maissi-paprika", cat: 11}, {name: "Pasta", cat: 9}] },
